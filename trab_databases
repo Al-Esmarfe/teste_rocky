@@ -1,0 +1,58 @@
+CREATE table vendas_carros(
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  data DATE,
+  modelo INTEGER,
+  quantidade INTEGER,
+  preco REAL,
+  nome TEXT,
+  fabricante TEXT
+ );
+
+INSERT INTO vendas_carros (data, modelo, quantidade, preco, nome)
+SELECT c1, c2, c3, c4, c5
+FROM fixed_database_1;
+
+UPDATE vendas_carros
+SET fabricante = (
+    SELECT c2
+    FROM fixed_database_2
+    WHERE vendas_carros.modelo = fixed_database_2.c1
+);
+
+select * from vendas_carros;
+
+--1 Qual marca teve o maior volume de vendas?
+SELECT fabricante, SUM(quantidade) as total_vendas
+FROM vendas_carros
+GROUP BY fabricante
+ORDER BY total_vendas DESC
+LIMIT 1;
+
+--2 Qual veículo gerou a maior e menor receita?
+SELECT nome, preco, quantidade, preco*quantidade as receita
+FROM vendas_carros
+ORDER BY receita DESC
+LIMIT 5;
+
+SELECT nome, preco, quantidade, preco*quantidade as receita
+FROM vendas_carros
+ORDER BY receita ASC
+LIMIT 5;
+
+--3 Qual a média de vendas do ano por marca?
+PIE-SELECT fabricante, ROUND(AVG(quantidade), 2) as media_vendas_ano
+FROM vendas_carros
+GROUP BY fabricante;
+
+--4 Quais marcas geraram uma receita maior com número menor de vendas?
+BAR-SELECT fabricante, SUM(preco*quantidade) as receita_total, SUM(quantidade) as total_vendas
+FROM vendas_carros
+GROUP BY fabricante
+HAVING SUM(preco*quantidade) > 100000 AND SUM(quantidade) < 100;
+
+--5 Existe alguma relação entre os veículos mais vendidos?
+SELECT nome, COUNT(*) as frequencia
+FROM vendas_carros
+GROUP BY nome
+HAVING COUNT(*) > 1
+ORDER BY frequencia DESC;
